@@ -1,7 +1,7 @@
 __pycache__/
 *.h5
 *.keras
-Brain tumor data/
+Brain_Tumor_data/
 OLD/
 models/
 tmp_models/
