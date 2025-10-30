@@ -1,0 +1,30 @@
+{
+    "timestamp": "2025-10-29 23:54:53",
+    "model_type": "Federated Quantum CNN",
+    "model_config": {
+        "num_clients": 5,
+        "image_size": [
+            64,
+            64
+        ],
+        "num_classes": 4,
+        "n_qubits": 4,
+        "n_quantum_layers": 2
+    },
+    "kfold_results": {
+        "fold_scores": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "mean_accuracy": 0.0,
+        "std_accuracy": 0.0
+    },
+    "test_accuracy": 0.6872616323417239,
+    "training_history": {
+        "val_accuracy": [],
+        "val_loss": []
+    }
+}

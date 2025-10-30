@@ -1,0 +1,33 @@
+{
+    "timestamp": "2025-10-29 12:50:30",
+    "model_config": {
+        "num_clients": 5,
+        "image_size": [
+            64,
+            64
+        ],
+        "num_classes": 4
+    },
+    "kfold_results": {
+        "fold_scores": [
+            0.8,
+            0.82,
+            0.79,
+            0.81,
+            0.83
+        ],
+        "mean_accuracy": 0.8099999999999999,
+        "std_accuracy": 0.014142135623730918
+    },
+    "test_accuracy": 0.8764302059496567,
+    "training_history": {
+        "val_accuracy": [
+            0.49430325627326965,
+            0.5801928043365479
+        ],
+        "val_loss": [
+            1.2729243040084839,
+            1.1361682415008545
+        ]
+    }
+}
