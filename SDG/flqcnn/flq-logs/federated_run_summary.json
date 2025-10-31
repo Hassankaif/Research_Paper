@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-10-31T19:09:16.803297",
+  "num_clients": 5,
+  "num_rounds": 5,
+  "local_epochs": 6,
+  "total_shots": 1000,
+  "shots_per_client": 200,
+  "noise": {
+    "use_noise": true,
+    "noise_prob": 0.02
+  }
+}
