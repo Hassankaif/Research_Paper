@@ -146,39 +146,49 @@ class QuantumInspiredLayer(layers.Layer):
             return None
 
 def create_quantum_cnn_model():
-    """Create hybrid classical-quantum CNN model"""
-    inputs = layers.Input(shape=(IMG_SIZE, IMG_SIZE, 3))
+    """Create hybrid classical-quantum CNN model - QCNN"""
+    model = keras.Sequential([
+        # Classical convolutional layers for feature extraction
+        layers.Input(shape=(64, 64, 3)),
+        
+        # Block 1 (32 filters)
+        layers.Conv2D(32, (3, 3), activation='relu', padding='same'),
+        layers.BatchNormalization(),
+        layers.Conv2D(32, (3, 3), activation='relu', padding='same'),
+        layers.BatchNormalization(),
+        layers.MaxPooling2D((2, 2)),
+        layers.Dropout(0.25),
+        
+        # Block 2 (64 filters)
+        layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
+        layers.BatchNormalization(),
+        layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
+        layers.BatchNormalization(),
+        layers.MaxPooling2D((2, 2)),
+        layers.Dropout(0.25),
+
+        # Block 3 (128 filters)
+        layers.Conv2D(128, (3, 3), activation='relu', padding='same'),
+        layers.BatchNormalization(),
+        layers.Conv2D(128, (3, 3), activation='relu', padding='same'),
+        layers.BatchNormalization(),
+        layers.MaxPooling2D((2, 2)),
+        layers.Dropout(0.25),
+        
+        layers.Flatten(),
+        layers.Dense(64, activation='relu'),
+        layers.Dropout(0.5),
+        
+        # Dimensionality reduction for quantum layer
+        layers.Dense(N_QUBITS, activation='tanh'),
+        
+        # Quantum layer
+        QuantumLayer(N_QUBITS, N_LAYERS),
+        
+        # Classical output layer
+        layers.Dense(len(CLASS_NAMES), activation='softmax')
+    ])
     
-    # Classical convolutional layers for feature extraction
-    x = layers.Conv2D(32, (3, 3), activation='relu', padding='same')(inputs)
-    x = layers.BatchNormalization()(x)
-    x = layers.MaxPooling2D((2, 2))(x)
-    x = layers.Dropout(0.25)(x)
-    
-    x = layers.Conv2D(64, (3, 3), activation='relu', padding='same')(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.MaxPooling2D((2, 2))(x)
-    x = layers.Dropout(0.25)(x)
-    
-    x = layers.Conv2D(128, (3, 3), activation='relu', padding='same')(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.MaxPooling2D((2, 2))(x)
-    x = layers.Dropout(0.25)(x)
-    
-    x = layers.Flatten()(x)
-    x = layers.Dense(64, activation='relu')(x)
-    x = layers.Dropout(0.5)(x)
-    
-    # Dimensionality reduction for quantum layer
-    x = layers.Dense(N_QUBITS, activation='tanh', name='quantum_input')(x)
-    
-    # Quantum-inspired layer
-    x = QuantumInspiredLayer(N_QUBITS, N_LAYERS, name='quantum_layer')(x)
-    
-    # Classical output layer
-    outputs = layers.Dense(len(CLASS_NAMES), activation='softmax')(x)
-    
-    model = keras.Model(inputs=inputs, outputs=outputs)
     return model
 
 def load_data(data_dir, img_size=IMG_SIZE):
@@ -528,3 +538,88 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
+    
+#other visualization graphs, execute in separate cells
+plt.figure(figsize=(10,6))
+sns.lineplot(data=df, x='Epoch', y='Accuracy', hue='Fold', marker='o')
+plt.title('Training Accuracy vs Epochs (per Fold)', fontsize=14)
+plt.xlabel('Epoch Number')
+plt.ylabel('Accuracy')
+plt.legend(title='Fold No')
+plt.grid(True)
+plt.show()
+
+plt.figure(figsize=(10,6))
+sns.lineplot(data=df, x='Epoch', y='Val Accuracy', hue='Fold', marker='o', palette='husl')
+plt.title('Validation Accuracy vs Epochs (per Fold)', fontsize=14)
+plt.xlabel('Epoch Number')
+plt.ylabel('Validation Accuracy')
+plt.legend(title='Fold No')
+plt.grid(True)
+plt.show()
+
+
+plt.figure(figsize=(10,6))
+sns.lineplot(data=df, x='Epoch', y='Loss', label='Training Loss', marker='o')
+sns.lineplot(data=df, x='Epoch', y='Val Loss', label='Validation Loss', marker='s')
+plt.title('Training vs Validation Loss', fontsize=14)
+plt.xlabel('Epoch Number')
+plt.ylabel('Loss')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+
+plt.figure(figsize=(10,5))
+sns.lineplot(data=df, x='Epoch', y='Learning Rate', hue='Fold', marker='D')
+plt.title('Learning Rate Progression per Fold', fontsize=14)
+plt.xlabel('Epoch Number')
+plt.ylabel('Learning Rate')
+plt.legend(title='Fold No')
+plt.grid(True)
+plt.show()
+
+# Select the last epoch per fold
+final_epochs = df.groupby('Fold').tail(1)
+
+plt.figure(figsize=(10,6))
+sns.barplot(data=final_epochs, x='Fold', y='Val Accuracy', palette='viridis')
+plt.title('Final Validation Accuracy per Fold', fontsize=14)
+plt.xlabel('Fold No')
+plt.ylabel('Validation Accuracy')
+plt.show()
+
+df.columns = df.columns.str.strip() 
+
+# Replace non-numeric symbols and convert to float
+df['Learning Rate'] = df['Learning Rate'].astype(str)
+df['Learning Rate'] = df['Learning Rate'].str.replace('[^0-9.eE-]', '', regex=True)
+df['Learning Rate'] = pd.to_numeric(df['Learning Rate'], errors='coerce')
+
+for col in ['Accuracy', 'Loss', 'Val Accuracy', 'Val Loss']:
+    df[col] = pd.to_numeric(df[col], errors='coerce')
+
+
+df = df.dropna(subset=['Accuracy','Loss','Val Accuracy','Val Loss','Learning Rate'])
+plt.figure(figsize=(8,6))
+sns.heatmap(
+    df[['Accuracy','Loss','Val Accuracy','Val Loss','Learning Rate']].corr(),
+    annot=True,
+    cmap='coolwarm',
+    fmt='.2f'
+)
+plt.title('Correlation Heatmap of Training Metrics', fontsize=14)
+plt.show()
+
+
+df['val_accuracy_smooth'] = df.groupby('Fold')['Val Accuracy'].transform(lambda x: x.rolling(window=3, min_periods=1).mean())
+
+plt.figure(figsize=(10,6))
+sns.lineplot(data=df, x='Epoch', y='val_accuracy_smooth', hue='Fold', marker='o')
+plt.title('Smoothed Validation Accuracy (Rolling Average)', fontsize=14)
+plt.xlabel('Epoch Number')
+plt.ylabel('Smoothed Validation Accuracy')
+plt.legend(title='Fold No')
+plt.grid(True)
+plt.show()

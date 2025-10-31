@@ -3,7 +3,7 @@ import numpy as np
 from tensorflow.keras.preprocessing.image import ImageDataGenerator, img_to_array, load_img
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, BatchNormalization
 from tensorflow.keras.optimizers import Adam
 from sklearn.model_selection import KFold
 from sklearn.preprocessing import LabelEncoder
@@ -43,16 +43,36 @@ print(f"[INFO] Loaded {len(X)} images across {len(class_names)} classes: {class_
 # ==========================
 # 2️⃣ Define CNN Model
 # ==========================
-def build_cnn(input_shape, num_classes):
+def build_cnn(input_shape=(64, 64, 3), num_classes=4): #CNN
     model = Sequential([
-        Conv2D(32, (3,3), activation='relu', input_shape=input_shape),
-        MaxPooling2D(2,2),
-        Conv2D(64, (3,3), activation='relu'),
-        MaxPooling2D(2,2),
-        Conv2D(128, (3,3), activation='relu'),
-        MaxPooling2D(2,2),
+        # Block 1
+        Conv2D(32, (3, 3), activation='relu', padding='same', input_shape=input_shape),
+        BatchNormalization(),
+        Conv2D(32, (3, 3), activation='relu', padding='same'),
+        BatchNormalization(),
+        MaxPooling2D((2, 2)),
+        Dropout(0.25),
+
+        # Block 2
+        Conv2D(64, (3, 3), activation='relu', padding='same'),
+        BatchNormalization(),
+        Conv2D(64, (3, 3), activation='relu', padding='same'),
+        BatchNormalization(),
+        MaxPooling2D((2, 2)),
+        Dropout(0.25),
+
+        # Block 3
+        Conv2D(128, (3, 3), activation='relu', padding='same'),
+        BatchNormalization(),
+        Conv2D(128, (3, 3), activation='relu', padding='same'),
+        BatchNormalization(),
+        MaxPooling2D((2, 2)),
+        Dropout(0.25),
+
+        # Dense Layers
         Flatten(),
-        Dense(256, activation='relu'),
+        Dense(64, activation='relu'), #256 TO 64
+        BatchNormalization(),
         Dropout(0.5),
         Dense(num_classes, activation='softmax')
     ])

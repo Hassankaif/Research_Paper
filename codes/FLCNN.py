@@ -65,8 +65,9 @@ class FederatedBrainTumorCNN:
         self.global_model = None
         self.history = {'val_accuracy': [], 'val_loss': []}
 
+#==========================================FLCNN========================================================        
     def create_cnn_model(self):
-        """Create CNN architecture for brain tumor classification"""
+        """Create FLCNN architecture for brain tumor classification"""
         model = models.Sequential([
             layers.Input(shape=(*self.img_size, 3)),
 
@@ -91,18 +92,8 @@ class FederatedBrainTumorCNN:
             layers.MaxPooling2D((2, 2)),
             layers.Dropout(0.25),
 
-            layers.Conv2D(256, (3, 3), activation='relu', padding='same'),
-            layers.BatchNormalization(),
-            layers.Conv2D(256, (3, 3), activation='relu', padding='same'),
-            layers.BatchNormalization(),
-            layers.MaxPooling2D((2, 2)),
-            layers.Dropout(0.25),
-
             layers.Flatten(),
-            layers.Dense(512, activation='relu'),
-            layers.BatchNormalization(),
-            layers.Dropout(0.5),
-            layers.Dense(256, activation='relu'),
+            layers.Dense(64, activation='relu'), #256 TO 64
             layers.BatchNormalization(),
             layers.Dropout(0.5),
             layers.Dense(self.num_classes, activation='softmax')

@@ -178,22 +178,30 @@ class FederatedQuantumCNN:
 
     def create_quantum_cnn_model(self):
         """
-        Create Hybrid Quantum-Classical CNN architecture
-        Architecture matches QCNN.py but adapted for federated learning
+        Create Hybrid Quantum-Classical CNN architecture.
+        MODIFIED to match the deeper classical CNN base (2x Conv2D per block).
         """
         inputs = layers.Input(shape=(*self.img_size, 3))
         
-        # Classical convolutional layers (same as QCNN.py)
+        # Block 1 (32 filters)
         x = layers.Conv2D(32, (3, 3), activation='relu', padding='same')(inputs)
         x = layers.BatchNormalization()(x)
+        x = layers.Conv2D(32, (3, 3), activation='relu', padding='same')(x)  
+        x = layers.BatchNormalization()(x)                                  
         x = layers.MaxPooling2D((2, 2))(x)
         x = layers.Dropout(0.25)(x)
         
+        # Block 2 (64 filters)
+        x = layers.Conv2D(64, (3, 3), activation='relu', padding='same')(x)
+        x = layers.BatchNormalization()(x)
         x = layers.Conv2D(64, (3, 3), activation='relu', padding='same')(x)
         x = layers.BatchNormalization()(x)
         x = layers.MaxPooling2D((2, 2))(x)
         x = layers.Dropout(0.25)(x)
         
+        # Block 3 (128 filters)
+        x = layers.Conv2D(128, (3, 3), activation='relu', padding='same')(x)
+        x = layers.BatchNormalization()(x)
         x = layers.Conv2D(128, (3, 3), activation='relu', padding='same')(x)
         x = layers.BatchNormalization()(x)
         x = layers.MaxPooling2D((2, 2))(x)
