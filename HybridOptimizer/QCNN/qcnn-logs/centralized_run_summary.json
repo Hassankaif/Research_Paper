@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-12-14T17:16:44.462147",
+  "epochs": 30,
+  "total_shots": 1000,
+  "training_time_sec": 725.7781784534454,
+  "final_val_acc": 0.5521472096443176,
+  "final_val_loss": 1.1556777954101562,
+  "noise": {
+    "use_noise": true,
+    "noise_prob": 0.02
+  }
+}
